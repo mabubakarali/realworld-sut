@@ -1,0 +1,41 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./react-redux-realworld-example-app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: ./react-redux-realworld-example-app/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest unit tests
+        run: npm test -- --watch=false
+
+      - name: Run Cypress home page smoke tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./react-redux-realworld-example-app
+          start: npm start
+          wait-on: 'http://localhost:4100'
+          spec: cypress/e2e/home.cy.js
+          browser: electron
